@@ -1,0 +1,1 @@
+This is Emacs Junk for Java. It's just a hodgepodge collection of Elisp that I find helps me write Java faster.  It doesn't try to add IDE-like features, but just some approximate junk.
