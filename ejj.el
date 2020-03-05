@@ -15,7 +15,8 @@
     (insert-file-contents "/Users/nealsid/jre-classes.txt")
     (setq java-classes (split-string (buffer-string) "\n"))))
 
-(defun add-java-class (use-killring)
+(defun add-java-class ()
+  (interactive)
   (let ((search-string (current-kill 0 t)))
     (set-text-properties 0 (length search-string) nil search-string)
     (let* ((results (seq-filter (apply-partially 'cl-search (current-kill 0))
