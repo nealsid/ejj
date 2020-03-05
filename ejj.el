@@ -2,18 +2,20 @@
 ;; Emacs Junk for Java
 ;;
 
+;; Reads a list of java classes for use in the other functions.
+;; It just has to be one line per fully qualified class name.
+;; I created it with the following command:
+;;
+;; $ unzip -l /Library/Java/JavaVirtualMachines/jdk-13.0.1.jdk/Contents/Home/lib/src.zip  | tail +4 | tr -s " " | cut -f 5 -d " " | sed -e "s/^[^/]*\///g" | sed -e "s/\//./g" | sed -e "s/\.java$//g" > ~/jre-classes.txt
+;;
+;;
+
 (defun initialize-java-class-list ()
   (with-temp-buffer
     (insert-file-contents "/Users/nealsid/jre-classes.txt")
     (setq java-classes (split-string (buffer-string) "\n"))))
 
 (defun add-java-class (use-killring)
-  (interactive
-   (cond
-    ((equal current-prefix-arg '(4))
-     (list t))
-    (t (list nil))))
-
   (let ((search-string (current-kill 0 t)))
     (set-text-properties 0 (length search-string) nil search-string)
     (let* ((results (seq-filter (apply-partially 'cl-search (current-kill 0))
