@@ -19,9 +19,10 @@
     (let* ((results (seq-filter (apply-partially 'cl-search (current-kill 0))
 				java-classes))
 	   (resultslen (length results)))
-      (if (> resultslen 0)
-	  (insert (ido-completing-read "class> " java-classes nil nil search-string nil))
-	(insert (ido-completing-read "class> " java-classes nil nil nil nil))))))
+      (let ((chosen-class (ido-completing-read "class> " java-classes nil nil (if (> resultslen 0) search-string nil) nil)))
+	(string-match "\.\\([^\.]+\\)$" chosen-class)
+	(insert (match-string 1 chosen-class))
+	(add-import-and-sort chosen-class)))))
 
 (initialize-java-class-list)
 (global-set-key (kbd "M-J") 'add-java-class)
@@ -84,4 +85,5 @@
       (goto-char imports-end)
       (insert (concat "
 import " java-class-name ";"))
-      (sort-lines nil imports-beginning (point)))))
+      (sort-lines nil imports-beginning (point))
+      (delete-duplicate-lines imports-beginning (point) nil t))))
