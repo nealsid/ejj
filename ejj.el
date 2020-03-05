@@ -14,7 +14,14 @@
      (list t))
     (t (list nil))))
 
-  (insert (ido-completing-read "class> " java-classes nil nil (if use-killring (current-kill 0) nil))))
+  (let ((search-string (current-kill 0 t)))
+    (set-text-properties 0 (length search-string) nil search-string)
+    (let* ((results (seq-filter (apply-partially 'cl-search (current-kill 0))
+				java-classes))
+	   (resultslen (length results)))
+      (if (> resultslen 0)
+	  (insert (ido-completing-read "class> " java-classes nil nil search-string nil))
+	(insert (ido-completing-read "class> " java-classes nil nil nil nil))))))
 
 (initialize-java-class-list)
 (global-set-key (kbd "M-J") 'add-java-class)
