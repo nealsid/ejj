@@ -61,15 +61,16 @@
      ((eq 1 resultslen) (seq-elt results 0))
      (t (ido-completing-read "choose> " results)))))
 
-(defun find-region-of-import-statements()
+(defun find-region-of-import-statements ()
   (save-excursion
     (goto-char (point-min))
-    (re-search-forward "^import")
+    (re-search-forward "^import" nil 't)
     (beginning-of-line)
     (let ((import-beginning (point)))
       (goto-char (point-max))
-      (re-search-backward "^import")
-      (end-of-line)
+      (re-search-backward "^import" nil 'move-to-limit-if-not-found)
+      (cond ((string-at-point-equals "import")
+	     (end-of-line)))
       (list import-beginning (point)))))
 
 ;; Need to remove duplicates from import list after adding.
@@ -84,9 +85,15 @@
   (save-excursion
     (let* ((import-markers (find-region-of-import-statements))
 	   (imports-beginning (elt import-markers 0))
-	   (imports-end (elt import-markers 1)))
+	   (imports-end (elt import-markers 1))
+	   (no-existing-imports (equal imports-end imports-beginning))
+	   (extra-newline-pre (if no-existing-imports "" "\n"))
+	   (extra-newline-post (if no-existing-imports "\n" "")))
       (goto-char imports-end)
-      (insert (concat "
-import " java-class-name ";"))
+      (insert (concat extra-newline-pre "import " java-class-name ";"))
       (sort-lines nil imports-beginning (point))
       (delete-duplicate-lines imports-beginning (point) nil t))))
+
+
+(defun string-at-point-equals (str)
+  (equal (buffer-substring-no-properties (point) (+ (point) (length str))) str))
